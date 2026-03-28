@@ -1,0 +1,38 @@
+from telegram import Update, ReplyKeyboardMarkup
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+import os
+
+TOKEN = os.environ.get("BOT_TOKEN")
+
+RESPONSES = {
+    "services": "We provide website, app, and AI development.",
+    "pricing": "Our pricing starts from ₹999.",
+    "contact": "Call us at +91-XXXXXXXXXX",
+    "about": "We build smart solutions for businesses."
+}
+
+MENU = [
+    ["Services", "Pricing"],
+    ["Contact", "About"]
+]
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    keyboard = ReplyKeyboardMarkup(MENU, resize_keyboard=True)
+    await update.message.reply_text("Welcome! Choose an option:", reply_markup=keyboard)
+
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    text = update.message.text.lower().strip()
+
+    if text in RESPONSES:
+        await update.message.reply_text(RESPONSES[text])
+    else:
+        await update.message.reply_text("Please choose from menu or type /start")
+
+app = Application.builder().token(TOKEN).build()
+
+app.add_handler(CommandHandler("start", start))
+app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+
+if __name__ == "__main__":
+    print("Bot is running...")
+    app.run_polling()
